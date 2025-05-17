@@ -1,5 +1,6 @@
 ﻿using EnterpriseAppLINQ.Models;
 using Microsoft.AspNetCore.Mvc;
+using EnterpriseAppLINQ.DTOs;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using EnterpriseAppLINQ.Data;
@@ -113,6 +114,35 @@ namespace EnterpriseAppLINQ.Controllers
             }
 
             return productsSold;
+        }
+        
+        [HttpGet("{orderId}/details-with-products")]
+        public async Task<ActionResult<OrderDetailsDto>> GetOrderWithProducts(int orderId)
+        {
+            var dto = await _context.Orders
+                .AsNoTracking()  // opcional: solo lectura
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
+                .Where(o => o.OrderId == orderId)
+                .Select(o => new OrderDetailsDto
+                {
+                    OrderId   = o.OrderId,
+                    OrderDate = o.OrderDate,
+                    Products  = o.OrderDetails
+                        .Select(od => new ProductDto
+                        {
+                            ProductName = od.Product.Name,
+                            Quantity    = od.Quantity,
+                            Price       = od.Product.Price
+                        })
+                        .ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (dto == null)
+                return NotFound($"No se encontró la orden {orderId}.");
+
+            return Ok(dto);
         }
     }
 }

@@ -1,13 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace EnterpriseAppLINQ.Models
+﻿namespace EnterpriseAppLINQ.Models
 {
     public class Client
     {
-        public int ClientId { get; set; } // ID del cliente
-        public string Name { get; set; }  // Nombre del cliente
+        public int    ClientId { get; set; }
+        public string Name     { get; set; } = null!;
+        public string Email    { get; set; } = null!;
 
-        // Otras propiedades como email, teléfono, etc.
-        public string Email { get; set; }
+        // <-- propiedad de navegación para Include()
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }

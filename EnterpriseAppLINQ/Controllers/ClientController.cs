@@ -1,8 +1,10 @@
-﻿using EnterpriseAppLINQ.Models;
+﻿using EnterpriseAppLINQ.Data;
+using EnterpriseAppLINQ.DTOs;
+using EnterpriseAppLINQ.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using EnterpriseAppLINQ.Data;
+
 
 namespace EnterpriseAppLINQ.Controllers
 {
@@ -166,5 +168,95 @@ namespace EnterpriseAppLINQ.Controllers
         {
             return _context.Clients.Any(e => e.ClientId == id);
         }
+        
+        
+        [HttpGet("readonly/clients-with-orders")]
+        public async Task<ActionResult<IEnumerable<ClientOrderDto>>> GetClientsWithOrders()
+        {
+            var data = await _context.Clients
+                .AsNoTracking()                       // 1) Solo lectura, no tracking
+                .Include(c => c.Orders)               // 2) Traer la colección de Orders
+                .Select(c => new ClientOrderDto       // 3) Proyectar al DTO
+                {
+                    ClientName = c.Name,              //    nombre del cliente
+                    Orders = c.Orders
+                        .Select(o => new OrderDto
+                        {
+                            OrderId   = o.OrderId,
+                            OrderDate = o.OrderDate
+                        })
+                        .ToList()
+                })
+                .ToListAsync();                       // 4) Materializar como lista
+
+            return Ok(data);
+        }
+        
+        [HttpGet("totalProductsByClient")]
+        public async Task<ActionResult<IEnumerable<ClientProductCountDto>>> GetTotalProductsByClient()
+        {
+            // 1) Consulta intermedia: sumar todas las cantidades de OrderDetails
+            //    agrupadas por el ClientId de su Order padre.
+            var totals = await _context.Orders
+                .AsNoTracking()
+                .SelectMany(o => o.OrderDetails,
+                    (o, od) => new { o.ClientId, od.Quantity })
+                .GroupBy(x => x.ClientId)
+                .Select(g => new
+                {
+                    ClientId      = g.Key,
+                    TotalProducts = g.Sum(x => x.Quantity)
+                })
+                .ToListAsync();
+
+            // 2) Cargar todos los clientes y “enchufar” el total calculado
+            var clients = await _context.Clients
+                .AsNoTracking()
+                .ToListAsync();
+
+            var result = clients
+                .Select(c => new ClientProductCountDto
+                {
+                    ClientName    = c.Name,
+                    TotalProducts = totals
+                        .FirstOrDefault(t => t.ClientId == c.ClientId)?
+                        .TotalProducts ?? 0
+                })
+                .ToList();
+
+            return Ok(result);
+        }
+        
+        [HttpGet("sales/by-client")]
+        public async Task<ActionResult<IEnumerable<SalesByClientDto>>> GetSalesByClient()
+        {
+            var data = await _context.Orders
+                // 1) Traer los detalles y sus productos
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
+                .AsNoTracking()             // 2) Solo lectura
+                .GroupBy(o => o.ClientId)    // 3) Agrupar por cliente
+                .Select(g => new SalesByClientDto
+                {
+                    // 4) Nombre del cliente (lo buscamos en Clients)
+                    ClientName = _context.Clients
+                        .Where(c => c.ClientId == g.Key)
+                        .Select(c => c.Name)
+                        .FirstOrDefault() ?? "—",
+
+                    // 5) Sumar por cada OrderDetail: cantidad * precio
+                    TotalSales = g
+                        .SelectMany(o => o.OrderDetails)
+                        .Sum(d => d.Quantity * d.Product.Price)
+                })
+                .OrderByDescending(s => s.TotalSales) // 6) Orden descendente por ventas
+                .ToListAsync();
+
+            if (!data.Any())
+                return NotFound("No se encontraron ventas de clientes.");
+
+            return Ok(data);
+        }
     }
+    
 }

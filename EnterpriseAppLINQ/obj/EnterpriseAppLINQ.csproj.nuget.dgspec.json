@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\hp\\RiderProjects\\EnterpriseAppLINQ\\EnterpriseAppLINQ\\EnterpriseAppLINQ.csproj": {}
+    "C:\\Users\\hp\\RiderProjects\\wasa\\examen08\\EnterpriseAppLINQ\\EnterpriseAppLINQ.csproj": {}
   },
   "projects": {
-    "C:\\Users\\hp\\RiderProjects\\EnterpriseAppLINQ\\EnterpriseAppLINQ\\EnterpriseAppLINQ.csproj": {
+    "C:\\Users\\hp\\RiderProjects\\wasa\\examen08\\EnterpriseAppLINQ\\EnterpriseAppLINQ.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\hp\\RiderProjects\\EnterpriseAppLINQ\\EnterpriseAppLINQ\\EnterpriseAppLINQ.csproj",
+        "projectUniqueName": "C:\\Users\\hp\\RiderProjects\\wasa\\examen08\\EnterpriseAppLINQ\\EnterpriseAppLINQ.csproj",
         "projectName": "EnterpriseAppLINQ",
-        "projectPath": "C:\\Users\\hp\\RiderProjects\\EnterpriseAppLINQ\\EnterpriseAppLINQ\\EnterpriseAppLINQ.csproj",
+        "projectPath": "C:\\Users\\hp\\RiderProjects\\wasa\\examen08\\EnterpriseAppLINQ\\EnterpriseAppLINQ.csproj",
         "packagesPath": "C:\\Users\\hp\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\hp\\RiderProjects\\EnterpriseAppLINQ\\EnterpriseAppLINQ\\obj\\",
+        "outputPath": "C:\\Users\\hp\\RiderProjects\\wasa\\examen08\\EnterpriseAppLINQ\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\hp\\AppData\\Roaming\\NuGet\\NuGet.Config"
